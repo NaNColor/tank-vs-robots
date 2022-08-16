@@ -1,3 +1,11 @@
+# Directoties
+/.vs
+/Debug
+/images
+/packages
+*.config
+VeryVeryGoodGame.*
+
 # Prerequisites
 *.d
 
