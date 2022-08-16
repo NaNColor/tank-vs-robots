@@ -30,6 +30,7 @@ public:
 	void struck(int damage);
 	bool isAlive() { return life; };
 	void draw(sf::RenderTarget& target);
+	sf::FloatRect GetRect() { return sf::FloatRect(x+5, y+5, w-5, h-5); };
 private:
 	// Будет вызываться внутри, так что инкапсулирую ф-ии
 	int control(sf::Event event);

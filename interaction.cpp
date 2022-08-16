@@ -73,8 +73,9 @@ void Engine::start()
 				iterEnemies->SetAim(Hero->GetXY());
 				iterEnemies->update(time, TileMapMy);
 				EnemyXY = iterEnemies->GetXY();
-				if ((HeroXY.x <= EnemyXY.x + 20) && (HeroXY.x >= EnemyXY.x - 20) && 
-					(HeroXY.y <= EnemyXY.y + 20) && (HeroXY.y >= EnemyXY.y - 20))
+				/*if ((HeroXY.x <= EnemyXY.x + 20) && (HeroXY.x >= EnemyXY.x - 20) && 
+					(HeroXY.y <= EnemyXY.y + 20) && (HeroXY.y >= EnemyXY.y - 20))*/
+				if(Hero->GetRect().intersects(iterEnemies->GetRect()))
 				{
 					iterEnemies->struck(100);
 					
