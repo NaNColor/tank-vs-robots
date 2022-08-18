@@ -15,7 +15,6 @@ class Enemy :public Entity {
 public:
 	Enemy( sf::Image& image, float X, float Y, int W, int H, sf::String Name, sf::String TileMap[HEIGHT_MAP]);
 	int update(float time, sf::String TileMap[HEIGHT_MAP]);// Жизнь объекта, ф-я вызывается в основной программе
-	bool isAlive() { return life; }; // Возвращает позицию спрайта
 	int SetAim(sf::Vector2f);//
 	sf::String GetStatus() { return status; };
 	void struck(int damage);

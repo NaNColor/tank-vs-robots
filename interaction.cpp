@@ -1,5 +1,4 @@
 #include "interaction.h"
-#include <iostream>
 #include "map.h"
 Engine::Engine()
 {
@@ -24,8 +23,9 @@ Engine::Engine()
 	Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 80, 80, "flybot", TileMapMy);
     enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
 	
-	//Enemy* MyEnemy = new Enemy(allImage, 200, 200, 80, 80, "flybot");
-	////
+	//Bullet* anotherBullet = new Bullet(allImage, 100, 100, 16, 16, Hero->GetRotation(), "HeroBullet");
+	//bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
+
 	GameOver = false;
 }
 
@@ -33,27 +33,32 @@ Engine::~Engine()
 {
 	delete Hero;
 	enemies.clear();
+	bullets.clear();
 }
 
 void Engine::start()
 {
-	sf::RenderWindow window(sf::VideoMode(1280, 800), "Game");
+	sf::RenderWindow window(sf::VideoMode(1280, 800), "Game", sf::Style::Fullscreen);
 	float timer = 0;
+	float gunTimer = 0;
 	while (window.isOpen() && !GameOver)
 	{
 		sf::Event event;
 		while (window.pollEvent(event))
 		{
-			if (event.type == sf::Event::Closed)
+			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
+			{
 				window.close();
-			if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))) {//если нажата клавиша вверх
-				GameOver = true;
 			}
+			//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {//если нажата клавиша 
+			//	GameOver = true;
+			//}
 		}
 		time = clock.getElapsedTime().asMicroseconds(); //дать прошедшее время в микросекундах
 		clock.restart(); //перезагружает время
 		time = time / 800; //скорость игры
 		timer += time;
+		gunTimer += time;
  		//
 		if (timer > 10000 && enemies.size()<4)
 		{
@@ -63,18 +68,53 @@ void Engine::start()
 		}
 
 		Hero->update(time, TileMapMy, event);
-		sf::Vector2f HeroXY = Hero->GetXY();
+		sf::Vector2f HeroXY = Hero->GetgunXY();
+		if (gunTimer > 1000 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+		{
+			Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 16, 16, Hero->GetRotation(), "HeroBullet");
+			bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
+			gunTimer = 0;
+		}
 		sf::Vector2f EnemyXY;
 		std::vector<Enemy>::iterator iterEnemies = enemies.begin();
+		std::vector<Bullet>::iterator iterBullet = bullets.begin();
+		while (iterBullet != bullets.end())
+		{
+			if (iterBullet->isAlive())
+			{
+				iterBullet->update(time, TileMapMy);
+				++iterBullet;
+			}
+			else
+			{
+				iterBullet = bullets.erase(iterBullet); //стереть из списка
+			}
+		}
     	while (iterEnemies != enemies.end()) 
 		{
 			if (iterEnemies->isAlive())
 			{
 				iterEnemies->SetAim(Hero->GetXY());
 				iterEnemies->update(time, TileMapMy);
-				EnemyXY = iterEnemies->GetXY();
-				/*if ((HeroXY.x <= EnemyXY.x + 20) && (HeroXY.x >= EnemyXY.x - 20) && 
-					(HeroXY.y <= EnemyXY.y + 20) && (HeroXY.y >= EnemyXY.y - 20))*/
+				//EnemyXY = iterEnemies->GetXY();
+
+				iterBullet = bullets.begin();
+				while (iterBullet != bullets.end())
+				{
+					if (iterBullet->isAlive())
+					{
+						if (iterBullet->GetRect().intersects(iterEnemies->GetRect()))
+						{
+							iterEnemies->struck(iterBullet->GetDamage());
+						}
+						++iterBullet;
+					}
+					else
+					{
+						iterBullet = bullets.erase(iterBullet); //стереть из списка
+					}
+				}
+
 				if(Hero->GetRect().intersects(iterEnemies->GetRect()))
 				{
 					iterEnemies->struck(100);
@@ -93,7 +133,28 @@ void Engine::start()
 			{
 				iterEnemies = enemies.erase(iterEnemies); //стереть из списка
 			}
-    	}
+			//if (!bullets.empty())
+			//{
+			//	iterBullet = bullets.begin();
+			//	while (iterBullet != bullets.end())
+			//	{
+			//		if (iterBullet->isAlive())
+			//		{
+			//			iterBullet->update(time, TileMapMy);
+			//			if (iterBullet->GetRect().intersects(iterEnemies->GetRect()))
+			//			{
+			//				iterEnemies->struck(iterBullet->GetDamage());
+			//			}
+			//			++iterBullet;
+			//		}
+			//		else
+			//		{
+			//			iterBullet = bullets.erase(iterBullet); //стереть из списка
+			//		}
+			//	}
+			//}
+			
+		}
 		GameOver = !Hero->isAlive();
 		//drawing ->
 		window.clear();
@@ -119,6 +180,11 @@ void Engine::start()
     		window.draw(iterEnemies->sprite);
 			++iterEnemies;
     	}
+		iterBullet = bullets.begin();
+		while (iterBullet != bullets.end()) {
+			window.draw(iterBullet->sprite);
+			++iterBullet;
+		}
 		//window.draw(MyEnemy->sprite);
 		window.display();
 	}

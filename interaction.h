@@ -1,5 +1,5 @@
 #pragma once
-
+#include "Bullet.h"
 #include "Enemy.h"
 #include "Player.h"
 class Engine {
@@ -10,7 +10,7 @@ class Engine {
 
     private:
         Player* Hero;
-        //std::vector<Bullet> bullets;
+        std::vector<Bullet> bullets;
         std::vector<Enemy> enemies;// вектор врагов
         sf::Clock clock;
         float time;

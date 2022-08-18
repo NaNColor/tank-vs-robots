@@ -1,5 +1,4 @@
 #include "Enemy.h";
-#include <iostream>
 /*
 Add an spaun in points wehere "s" on the map/
 there is 2 types of enemys: one who stays on ground and shooting, 

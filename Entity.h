@@ -25,6 +25,7 @@ public:
 		sprite.setTexture(texture);
 		sprite.setOrigin(w / 2, h / 2); // В центр спрайта ставим координаты
 	}
+	bool isAlive() { return life; }; // Возвращает позицию спрайта
 protected:
 	float dx, dy, x, y, speed, moveTimer;//добавили переменную таймер для будущих целей
 	int w, h, health;

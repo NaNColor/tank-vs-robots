@@ -1,10 +1,9 @@
 #include "Player.h"
 #include "Constants.h"
-#include <iostream>
 // Конструктор
 Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):Entity(image,X,Y,W,H,Name)
 {
-    state = stay;
+    state = up;
 	frame.setTexture(texture);
 	wheelL.setTexture(texture);
 	wheelR.setTexture(texture);
@@ -32,26 +31,32 @@ Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):
 	wheelL.setPosition(x, y);
 	wheelR.setPosition(x, y);
 	gun.setPosition(x, y);
+	gunrotation = 0;
 }
 
  //Для определения движения (пока скомунизжено)
 int Player::control(sf::Event event)
 {
 	state = stay;
+	sf::Vector2i DXY = sf::Mouse::getPosition();
+	//sf::Vector2i DXY = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
+	//std::cout <<  DXY.x << ";" << DXY.y << ";" << x << ";" << y << std::endl;
+	gunrotation = atan2(-y + DXY.y, -x + DXY.x) * 180 / 3.14159265 + 90;
 	if (sf::Keyboard::isKeyPressed) {//если нажата клавиша
-		if (sf::Keyboard::isKeyPressed(sf::Keyboard::Left)) {//а именно левая
+		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {//а именно левая
 			state = left; speed = 0.1;
 		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Right)) {
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::D)) {
 			state = right; speed = 0.1;
 		}
-		else if ((sf::Keyboard::isKeyPressed(sf::Keyboard::Up))) {//если нажата клавиша вверх
+		else if ((sf::Keyboard::isKeyPressed(sf::Keyboard::W))) {//если нажата клавиша вверх
 			state = up; speed = 0.085;
 		}
-		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::Down)) {
+		else if (sf::Keyboard::isKeyPressed(sf::Keyboard::S)) {
 			state = down; speed = 0.085;
 		}
 	}
+	
 	return 0;
 }
 
@@ -73,35 +78,33 @@ int Player::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_
 void Player::animation()
 {
 	//
+	gun.setRotation(gunrotation);
 	switch (state)
 	{
 	case Entity::left:
 		frame.setRotation(-90);
 		wheelL.setRotation(-90);
 		wheelR.setRotation(-90);
-		gun.setRotation(-90);
 		break;
 	case Entity::right:
 		frame.setRotation(90);
 		wheelL.setRotation(90);
 		wheelR.setRotation(90);
-		gun.setRotation(90);
 		break;
 	case Entity::up:
 		frame.setRotation(0);
 		wheelL.setRotation(0);
 		wheelR.setRotation(0);
-		gun.setRotation(0);
 		break;
 	case Entity::down:
 		frame.setRotation(180);
 		wheelL.setRotation(180);
 		wheelR.setRotation(180);
-		gun.setRotation(180);
 		break;
 	default:
 		break;
 	}
+	return;
 }
 int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 {
@@ -135,10 +138,18 @@ int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 	return 0;
 }
 
+sf::Vector2f Player::GetgunXY()
+{
+	sf::Vector2f buf = gun.getPosition();
+	buf.x += 80 * cos((gunrotation - 90)/ 180 * 3.14159265) +20;
+	buf.y += 80 * sin((gunrotation - 90)/ 180 * 3.14159265 ) + 20;
+	return buf;
+}
+
 void Player::struck(int damage)
 {
 	health -= damage;
-	std::cout << "HIt";
+	//std::cout << "HIt";
 	//sprite.setColor(sf::Color::Red);
 }
 void Player::draw(sf::RenderTarget& target)
