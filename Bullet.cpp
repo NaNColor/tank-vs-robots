@@ -1,16 +1,19 @@
 #include "Bullet.h"
 
-Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation, sf::String Name) :Entity(image, X, Y, W, H, Name)
+Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation, sf::String Name, int DMG) :Entity(image, X, Y, W, H, Name)
 {
 	//
-	if (Name == "HeroBullet")
+
+	damage = DMG;
+	if (damage > 20)
 	{
-		damage = 100;
+		sprite.setScale(0.1 * (damage / 10), 0.1 * (damage / 10));
 	}
 	else
 	{
-		damage = 50;
+		sprite.setScale(0.2 , 0.2 );
 	}
+	
 	TTL = 5000;
 	sprite.setOrigin(w / 2 , h / 2);
 	sprite.setTextureRect(sf::IntRect(0, 160, 49, 80));
@@ -21,7 +24,7 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 	dy = sin(rotation / 180 * 3.14159265) * 0.085;
 	sprite.setPosition(x + w / 2, y + w / 2);
 	speed = 2;
-	moveTimer = 0;
+	
 }
 
 void Bullet::update(float time, sf::String TileMap[HEIGHT_MAP])
@@ -58,7 +61,45 @@ int Bullet::GetDamage()
 
 void Bullet::animation()
 {
-	//
+	if (moveTimer < 100)
+	{
+		sprite.setTextureRect(sf::IntRect(0, 160, 49, 80));
+	}
+	else if (moveTimer < 200)
+	{
+		sprite.setTextureRect(sf::IntRect(49, 160, 47, 80));
+	}
+	else if (moveTimer < 300)
+	{
+		sprite.setTextureRect(sf::IntRect(95, 160, 48, 80));
+	}
+	else if (moveTimer < 400)
+	{
+		sprite.setTextureRect(sf::IntRect(142, 160, 48, 80));
+	}
+	else if (moveTimer < 500)
+	{
+		sprite.setTextureRect(sf::IntRect(189, 160, 48, 80));
+	}
+	else if (moveTimer < 600)
+	{
+		sprite.setTextureRect(sf::IntRect(237, 160, 48, 80));
+		moveTimer = 0;
+	}
+	else if (moveTimer < 700)
+	{
+		sprite.setTextureRect(sf::IntRect(219, 80, 48, 80));
+		moveTimer = 0;
+	}
+	else if (moveTimer < 800)
+	{
+		sprite.setTextureRect(sf::IntRect(266, 80, 48, 80));
+		
+	}
+	else
+	{
+		moveTimer = 0;
+	}
 }
 
 void Bullet::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_MAP])

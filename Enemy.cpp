@@ -11,7 +11,7 @@ Enemy::Enemy( sf::Image& image, float X, float Y, int W, int H, sf::String Name,
 	isMove = false;
 	status = "WTFBOT";
 	state = fly;
-	sprite.setTextureRect(sf::IntRect(0, 0, 80, 80));
+	sprite.setTextureRect(sf::IntRect(12, 5, 57, 68));//w = 45; h = 63
 	//sprite.setScale(1.2, 1.2);
 	//sprite.setColor(sf::Color::Green);
 	
@@ -114,29 +114,38 @@ int Enemy::action(float time, sf::String TileMap[HEIGHT_MAP])
 
 int Enemy::animation()
 {
-	if (status == "AlahuuuAkbar" || status == "killed")
+	if (status == "anikilled")
 	{
-		sprite.setTextureRect(sf::IntRect(240, 0, 80, 80));
-		if (status == "killed")
+		if (moveTimer < 100)
+		{
+			sprite.setTextureRect(sf::IntRect(240, 0, 80, 80));
+		}
+		else if (moveTimer < 200)
 		{
 			sprite.setColor(sf::Color::Red);
 		}
+		else
+		{
+			status = "killed";
+		}
+		
+		
 	}
 	else if (moveTimer < 200)
 	{
-		sprite.setTextureRect(sf::IntRect(0, 0, 80, 80));
+		sprite.setTextureRect(sf::IntRect(12, 5, 57, 68));
 	}
 	else if (moveTimer < 400)
 	{
-		sprite.setTextureRect(sf::IntRect(160, 0, 80, 80));
+		sprite.setTextureRect(sf::IntRect(172, 5, 56, 69));
 	}
 	else if (moveTimer < 600)
 	{
-		sprite.setTextureRect(sf::IntRect(80, 0, 80, 80));
+		sprite.setTextureRect(sf::IntRect(92, 5, 58, 72));
 	}
 	else if (moveTimer < 800)
 	{
-		sprite.setTextureRect(sf::IntRect(160, 0, 80, 80));
+		sprite.setTextureRect(sf::IntRect(172, 5, 56, 69));
 	}
 	else
 	{
@@ -162,9 +171,10 @@ int Enemy::update(float time, sf::String TileMap[HEIGHT_MAP])
 	{
 		life = false;
 	}
-	else if (health <= 0) { 
-		status = "killed";
+	else if (health <= 0 && status != "anikilled") {
+		status = "anikilled";
 		state = stay;
+		moveTimer = 0;
 		//sprite.setColor(sf::Color::Red);
 	}
 	

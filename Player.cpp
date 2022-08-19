@@ -1,8 +1,10 @@
 #include "Player.h"
 #include "Constants.h"
+
 // Конструктор
 Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):Entity(image,X,Y,W,H,Name)
 {
+	score = 0;
     state = up;
 	frame.setTexture(texture);
 	wheelL.setTexture(texture);
@@ -40,8 +42,8 @@ int Player::control(sf::Event event)
 	state = stay;
 	sf::Vector2i DXY = sf::Mouse::getPosition();
 	//sf::Vector2i DXY = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
-	//std::cout <<  DXY.x << ";" << DXY.y << ";" << x << ";" << y << std::endl;
 	gunrotation = atan2(-y + DXY.y, -x + DXY.x) * 180 / 3.14159265 + 90;
+	
 	if (sf::Keyboard::isKeyPressed) {//если нажата клавиша
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {//а именно левая
 			state = left; speed = 0.1;
@@ -73,11 +75,38 @@ int Player::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_
 				if (Dx < 0) { x = j * 32 + 32; }// с левым краем карты
 			}
 		}
+	if (state == stay && moveTimer >1000)
+	{
+		health += 10;
+		moveTimer = 500;
+		if (health>500)
+		{
+			health = 500;
+		}
+	}
 	return 0;
 }
 void Player::animation()
 {
 	//
+	if (state != stay)
+	{
+			
+		if (moveTimer < 100)
+		{
+			wheelL.setTextureRect(sf::IntRect(1, 80, 19, 77));
+			wheelR.setTextureRect(sf::IntRect(20, 81, 19, 77));
+		}
+		else if (moveTimer < 200)
+		{
+			wheelL.setTextureRect(sf::IntRect(40, 82, 19, 77));
+			wheelR.setTextureRect(sf::IntRect(59, 82, 19, 77));
+		}
+		else
+		{
+			moveTimer = 0;
+		}
+	}
 	gun.setRotation(gunrotation);
 	switch (state)
 	{
@@ -113,6 +142,7 @@ int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 	{
 		return 0;
 	}
+	moveTimer += time;
 	control(event);
 	animation();
 	switch (state)//тут делаются различные действия в зависимости от состояния
@@ -141,8 +171,31 @@ int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 sf::Vector2f Player::GetgunXY()
 {
 	sf::Vector2f buf = gun.getPosition();
-	buf.x += 80 * cos((gunrotation - 90)/ 180 * 3.14159265) +20;
-	buf.y += 80 * sin((gunrotation - 90)/ 180 * 3.14159265 ) + 20;
+	if (gunrotation < 45 && gunrotation > -45)
+	{
+		//up angle
+		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265) + 20;
+		buf.y += 80 * sin((gunrotation - 90) / 180 * 3.14159265);
+	}
+	else if (gunrotation < 135 && gunrotation > 45 || gunrotation < -225 && gunrotation > -270)
+	{
+		//right angle
+		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265);
+		buf.y += 80 * sin((gunrotation - 90) / 180 * 3.14159265) + 20;
+	}
+	else if (gunrotation < -45 && gunrotation > -135)
+	{
+		//left angle
+		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265) ;
+		buf.y += 80 * sin((gunrotation - 90) / 180 * 3.14159265) - 40;
+	}
+	else if(gunrotation < 225 && gunrotation > 135)
+	{
+		//down angle
+		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265) - 40;
+		buf.y += 80 * sin((gunrotation - 90) / 180 * 3.14159265);
+	}
+
 	return buf;
 }
 

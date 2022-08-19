@@ -33,6 +33,9 @@ public:
 	void draw(sf::RenderTarget& target);
 	sf::FloatRect GetRect() { return sf::FloatRect(x+5, y+5, w-5, h-5); };
 	float GetRotation() { return gunrotation; };
+	int Getscore() { return score; };
+	void Addscore(int SCR) { score += SCR; };
+	int Gethealth() { return health; };
 private:
 	// Будет вызываться внутри, так что инкапсулирую ф-ии
 	int control(sf::Event event);
@@ -43,6 +46,7 @@ private:
 	sf::Sprite gun;
 	sf::Sprite frame;
 	float gunrotation;
+	int score;
 };
 
 #endif

@@ -4,7 +4,7 @@
 class Bullet : public Entity
 {
 public:
-	Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,  sf::String Name);
+	Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,  sf::String Name, int);
 	//~Bullet();
 	void update(float time, sf::String TileMap[HEIGHT_MAP]);
 	int GetDamage();

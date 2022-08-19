@@ -20,6 +20,8 @@ class Engine {
         sf::Image allImage;//Все изображения, которые исполузуются поверх карты
         sf::Sprite s_map;//спрайт для карты
         sf::Texture map;
+        sf::Sprite Health;
+        sf::Sprite GunDamage;
         bool GameOver;//тригер для окончания игры
         
 };

@@ -1,5 +1,6 @@
 #include "interaction.h"
 #include "map.h"
+#include <iostream>
 Engine::Engine()
 {
 	
@@ -10,7 +11,7 @@ Engine::Engine()
 	s_map.setTexture(map);//заливаем текстуру спрайтом
 	allImage.loadFromFile("images/robots.png");
 	//загрузили изображения
-
+	
 	clock.restart(); //перезагружает время
 
 	////
@@ -20,7 +21,7 @@ Engine::Engine()
 
 	////
 	//Создаем объект Enemy
-	Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 80, 80, "flybot", TileMapMy);
+	Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 45, 65, "flybot", TileMapMy);
     enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
 	
 	//Bullet* anotherBullet = new Bullet(allImage, 100, 100, 16, 16, Hero->GetRotation(), "HeroBullet");
@@ -39,8 +40,30 @@ Engine::~Engine()
 void Engine::start()
 {
 	sf::RenderWindow window(sf::VideoMode(1280, 800), "Game", sf::Style::Fullscreen);
-	float timer = 0;
+	float timerspaun = 0;
 	float gunTimer = 0;
+	float spaunlvl = 5000;
+	float timerLVLup = 0;
+	sf::Image healthImg;
+	healthImg.loadFromFile("images/Health.png");
+	sf::Texture healthTexture;
+	healthTexture.loadFromImage(healthImg);
+	healthTexture.setRepeated(true);
+	Health.setTexture(healthTexture);
+
+	sf::Image gunDamageImg;
+	gunDamageImg.loadFromFile("images/Bullet.png");
+	sf::Texture gunDamageTexture;
+	gunDamageTexture.loadFromImage(gunDamageImg);
+	gunDamageTexture.setRepeated(true);
+	GunDamage.setTexture(gunDamageTexture);
+
+	Health.setTextureRect(sf::IntRect(0, 0, 32, 32));
+	Health.setScale(0.5, 0.5);
+	Health.setPosition(10,10);
+	GunDamage.setTextureRect(sf::IntRect(0, 0, 70, 348));
+	GunDamage.setScale(0.1, 0.1);
+	GunDamage.setPosition(10, 30);
 	while (window.isOpen() && !GameOver)
 	{
 		sf::Event event;
@@ -57,22 +80,59 @@ void Engine::start()
 		time = clock.getElapsedTime().asMicroseconds(); //дать прошедшее время в микросекундах
 		clock.restart(); //перезагружает время
 		time = time / 800; //скорость игры
-		timer += time;
+		timerspaun += time;
 		gunTimer += time;
- 		//
-		if (timer > 10000 && enemies.size()<4)
+		timerLVLup += time;
+		if (timerLVLup > 10000)
 		{
-			Enemy* anotherEnemy = new Enemy(allImage, 200, 200, 80, 80, "flybot",TileMapMy);
+			spaunlvl -= 500;
+			if (spaunlvl < 2000)
+			{
+				spaunlvl = 2000;
+			}
+			timerLVLup = 0;
+		}
+ 		//
+		if (timerspaun > spaunlvl && enemies.size()<10)
+		{
+			Enemy* anotherEnemy = new Enemy(allImage, 200, 200, 45, 65, "flybot",TileMapMy);
 			enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
-			timer = 0;
+			timerspaun = 0;
 		}
 
 		Hero->update(time, TileMapMy, event);
-		sf::Vector2f HeroXY = Hero->GetgunXY();
-		if (gunTimer > 1000 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+		Health.setTextureRect(sf::IntRect(0, 0, 32*(Hero->Gethealth()/20), 32));
+		if (gunTimer > 1000)
 		{
-			Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 16, 16, Hero->GetRotation(), "HeroBullet");
-			bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
+			GunDamage.setTextureRect(sf::IntRect(0, 0, 70 * 10, 348));
+		}
+		else
+		{
+			GunDamage.setTextureRect(sf::IntRect(0, 0, 70 * (gunTimer / 100), 348));
+		}
+		
+		if (gunTimer > 100 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+		{
+			int damage = gunTimer / 10;
+			if (damage > 100)
+			{
+				damage = 100;
+			}
+			if (damage > 20)
+			{
+				sf::Vector2f HeroXY = Hero->GetgunXY();
+				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 20, 20, Hero->GetRotation(), "HeroBullet", damage);
+				bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
+			}
+			else
+			{
+				sf::Vector2f HeroXY = Hero->GetXY();
+				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 10, 10, Hero->GetRotation(), "HeroBullet", damage);
+				bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
+			}
+			
+			
+			//std::cout << Hero->GetRotation() << std::endl;
 			gunTimer = 0;
 		}
 		sf::Vector2f EnemyXY;
@@ -119,11 +179,11 @@ void Engine::start()
 				{
 					iterEnemies->struck(100);
 					
-					if (iterEnemies->GetStatus() != "AlahuuuAkbar" && iterEnemies->GetStatus() != "killed")
+					if (iterEnemies->GetStatus() != "anikilled")
 					{
 						Hero->struck(20);
+						Hero->Addscore(100);
 					}
-					iterEnemies->SetStatus("AlahuuuAkbar");
 					
 				}
 				++iterEnemies;
@@ -186,6 +246,8 @@ void Engine::start()
 			++iterBullet;
 		}
 		//window.draw(MyEnemy->sprite);
+		window.draw(GunDamage);
+		window.draw(Health);
 		window.display();
 	}
 }
