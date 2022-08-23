@@ -24,6 +24,9 @@ Engine::Engine()
 	Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 45, 65, "flybot", TileMapMy);
     enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
 	
+	anotherEnemy = new Enemy(allImage, 200, 200, 80, 60, "BOSSbot", TileMapMy);
+	enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
+
 	//Bullet* anotherBullet = new Bullet(allImage, 100, 100, 16, 16, Hero->GetRotation(), "HeroBullet");
 	//bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
 
@@ -155,7 +158,7 @@ void Engine::start()
 			if (iterEnemies->isAlive())
 			{
 				iterEnemies->SetAim(Hero->GetXY());
-				iterEnemies->update(time, TileMapMy);
+				iterEnemies->update(time);
 				//EnemyXY = iterEnemies->GetXY();
 
 				iterBullet = bullets.begin();
@@ -237,7 +240,7 @@ void Engine::start()
 		Hero->draw(window);
 		iterEnemies = enemies.begin();
     	while (iterEnemies != enemies.end()) {
-    		window.draw(iterEnemies->sprite);
+			iterEnemies->draw(window);
 			++iterEnemies;
     	}
 		iterBullet = bullets.begin();

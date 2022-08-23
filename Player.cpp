@@ -74,16 +74,17 @@ int Player::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_
 				if (Dx > 0) { x = j * 32 - w; }//с правым краем карты
 				if (Dx < 0) { x = j * 32 + 32; }// с левым краем карты
 			}
+			if (TileMap[i][j] == 'h' && state == stay && moveTimer > 1000)
+			{
+				health += 10;
+				moveTimer = 500;
+				if (health > 500)
+				{
+					health = 500;
+				}
+			}
 		}
-	if (state == stay && moveTimer >1000)
-	{
-		health += 10;
-		moveTimer = 500;
-		if (health>500)
-		{
-			health = 500;
-		}
-	}
+	
 	return 0;
 }
 void Player::animation()
