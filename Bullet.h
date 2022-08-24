@@ -8,6 +8,8 @@ public:
 	//~Bullet();
 	void update(float time, sf::String TileMap[HEIGHT_MAP]);
 	int GetDamage();
+	sf::String GetName() { return name; };
+	sf::FloatRect GetRect();
 private:
 	int damage;
 	float TTL;

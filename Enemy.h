@@ -21,9 +21,15 @@ public:
 	sf::Vector2f GetXY() { return sf::Vector2f(x, y); }; // Возвращает позицию спрайта Enemy
 	void SetStatus(sf::String St) { status = St; };
 	void draw(sf::RenderTarget& target);
+	sf::FloatRect GetRect();
+	sf::String GetName() { return name; };
+	void recetBOSSdamagetimer() { BOSSdamagetimer = 0; };
+	float GetBOSSdamagetimer() { return BOSSdamagetimer; };
 private:
 	// Будет вызываться внутри, так что инкапсулирую ф-ии
+	float BOSSdamagetimer;
 	sf::Sprite BossPart;
+	sf::Sprite healthSprite;
 	int action(float);
 	int animation();
 	int checkCollisionWithMap(float, float);//ф ция проверки столкновений с картой (границами)

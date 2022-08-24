@@ -4,7 +4,9 @@
 // Конструктор
 Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):Entity(image,X,Y,W,H,Name)
 {
+	health = 500;
 	score = 0;
+	struckTimer = 0;
     state = up;
 	frame.setTexture(texture);
 	wheelL.setTexture(texture);
@@ -77,6 +79,7 @@ int Player::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_
 			if (TileMap[i][j] == 'h' && state == stay && moveTimer > 1000)
 			{
 				health += 10;
+
 				moveTimer = 500;
 				if (health > 500)
 				{
@@ -134,6 +137,20 @@ void Player::animation()
 	default:
 		break;
 	}
+	if (struckTimer > 0)
+	{
+		gun.setColor(sf::Color::Red);
+		frame.setColor(sf::Color::Red);
+		wheelL.setColor(sf::Color::Red);
+		wheelR.setColor(sf::Color::Red);
+	}
+	else
+	{
+		gun.setColor(sf::Color::White);
+		frame.setColor(sf::Color::White);
+		wheelL.setColor(sf::Color::White);
+		wheelR.setColor(sf::Color::White);
+	}
 	return;
 }
 int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
@@ -142,6 +159,10 @@ int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 	if (!life)
 	{
 		return 0;
+	}
+	if (struckTimer > 0)
+	{
+		struckTimer -= time;
 	}
 	moveTimer += time;
 	control(event);
@@ -203,8 +224,7 @@ sf::Vector2f Player::GetgunXY()
 void Player::struck(int damage)
 {
 	health -= damage;
-	//std::cout << "HIt";
-	//sprite.setColor(sf::Color::Red);
+	struckTimer = 200;
 }
 void Player::draw(sf::RenderTarget& target)
 {

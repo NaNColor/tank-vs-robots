@@ -24,13 +24,18 @@ Engine::Engine()
 	Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 45, 65, "flybot", TileMapMy);
     enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
 	
-	anotherEnemy = new Enemy(allImage, 200, 200, 80, 60, "BOSSbot", TileMapMy);
-	enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
+	
 
 	//Bullet* anotherBullet = new Bullet(allImage, 100, 100, 16, 16, Hero->GetRotation(), "HeroBullet");
 	//bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
 
 	GameOver = false;
+
+	font.loadFromFile("images\\CyrilicOld.ttf");
+	text.setFont(font);
+	text.setCharacterSize(24);
+	text.setStyle(sf::Text::Bold);
+	text.setPosition(1000, 5);
 }
 
 Engine::~Engine()
@@ -43,6 +48,10 @@ Engine::~Engine()
 void Engine::start()
 {
 	sf::RenderWindow window(sf::VideoMode(1280, 800), "Game", sf::Style::Fullscreen);
+	if (!MainMenu(window))
+	{
+		return;
+	}
 	float timerspaun = 0;
 	float gunTimer = 0;
 	float spaunlvl = 5000;
@@ -86,14 +95,17 @@ void Engine::start()
 		timerspaun += time;
 		gunTimer += time;
 		timerLVLup += time;
-		if (timerLVLup > 10000)
+		if (timerLVLup > 30000)
 		{
+			Enemy* anotherEnemy = new Enemy(allImage, 200, 200, 120, 90, "BOSSbot", TileMapMy);
+			enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
 			spaunlvl -= 500;
 			if (spaunlvl < 2000)
 			{
 				spaunlvl = 2000;
 			}
 			timerLVLup = 0;
+			timerspaun = 0;
 		}
  		//
 		if (timerspaun > spaunlvl && enemies.size()<10)
@@ -114,7 +126,7 @@ void Engine::start()
 			GunDamage.setTextureRect(sf::IntRect(0, 0, 70 * (gunTimer / 100), 348));
 		}
 		
-		if (gunTimer > 100 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
+		if (gunTimer > 150 && sf::Keyboard::isKeyPressed(sf::Keyboard::Space))
 		{
 			int damage = gunTimer / 10;
 			if (damage > 100)
@@ -124,21 +136,17 @@ void Engine::start()
 			if (damage > 20)
 			{
 				sf::Vector2f HeroXY = Hero->GetgunXY();
-				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 20, 20, Hero->GetRotation(), "HeroBullet", damage);
+				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 25, 25, Hero->GetRotation(), "HeroBullet", damage);
 				bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
 			}
 			else
 			{
 				sf::Vector2f HeroXY = Hero->GetXY();
-				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 10, 10, Hero->GetRotation(), "HeroBullet", damage);
+				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 15, 15, Hero->GetRotation(), "HeroBullet", damage);
 				bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
 			}
-			
-			
-			//std::cout << Hero->GetRotation() << std::endl;
 			gunTimer = 0;
 		}
-		sf::Vector2f EnemyXY;
 		std::vector<Enemy>::iterator iterEnemies = enemies.begin();
 		std::vector<Bullet>::iterator iterBullet = bullets.begin();
 		while (iterBullet != bullets.end())
@@ -157,18 +165,30 @@ void Engine::start()
 		{
 			if (iterEnemies->isAlive())
 			{
-				iterEnemies->SetAim(Hero->GetXY());
+				sf::Vector2f BufXYHero = Hero->GetXY();
+				iterEnemies->SetAim(BufXYHero);
 				iterEnemies->update(time);
-				//EnemyXY = iterEnemies->GetXY();
+				if (iterEnemies->GetName()=="BOSSbot" && iterEnemies->GetBOSSdamagetimer() > 2000)
+				{
+					sf::Vector2f BufXYEnemy = iterEnemies->GetXY();
+					float rotation = rotation = atan2(BufXYHero.y - BufXYEnemy.y, BufXYHero.x - BufXYEnemy.x) * 180 / 3.14159265 + 90;
+					Bullet* anotherBullet = new Bullet(allImage, BufXYEnemy.x, BufXYEnemy.y, 30, 30, rotation, "BossBullet", 25);
+					bullets.push_back(*anotherBullet);
+					iterEnemies->recetBOSSdamagetimer();
+				}
 
 				iterBullet = bullets.begin();
 				while (iterBullet != bullets.end())
 				{
 					if (iterBullet->isAlive())
 					{
-						if (iterBullet->GetRect().intersects(iterEnemies->GetRect()))
+						if (iterBullet->GetName() != "BossBullet" && iterBullet->GetRect().intersects(iterEnemies->GetRect()))
 						{
 							iterEnemies->struck(iterBullet->GetDamage());
+						}
+						if (iterBullet->GetName() != "HeroBullet" && iterBullet->GetRect().intersects(Hero->GetRect()))
+						{
+							Hero->struck(iterBullet->GetDamage());
 						}
 						++iterBullet;
 					}
@@ -180,12 +200,26 @@ void Engine::start()
 
 				if(Hero->GetRect().intersects(iterEnemies->GetRect()))
 				{
-					iterEnemies->struck(100);
-					
-					if (iterEnemies->GetStatus() != "anikilled")
+					if (iterEnemies->GetName() == "BOSSbot")
 					{
-						Hero->struck(20);
-						Hero->Addscore(100);
+						if (iterEnemies->GetStatus() != "anikilled")
+						{
+							if (iterEnemies->GetBOSSdamagetimer() > 500)
+							{
+								Hero->struck(10);
+								iterEnemies->recetBOSSdamagetimer();
+							}
+							
+						}
+					}
+					else
+					{
+						iterEnemies->struck(100);
+						if (iterEnemies->GetStatus() != "anikilled")
+						{
+							Hero->struck(20);
+							
+						}
 					}
 					
 				}
@@ -194,28 +228,16 @@ void Engine::start()
 			}
 			else 
 			{
+				if (iterEnemies->GetName() == "BOSSbot")
+				{
+				Hero->Addscore(500);
+				}
+				else if (iterEnemies->GetName() == "flybot")
+				{
+					Hero->Addscore(100);
+				}
 				iterEnemies = enemies.erase(iterEnemies); //стереть из списка
 			}
-			//if (!bullets.empty())
-			//{
-			//	iterBullet = bullets.begin();
-			//	while (iterBullet != bullets.end())
-			//	{
-			//		if (iterBullet->isAlive())
-			//		{
-			//			iterBullet->update(time, TileMapMy);
-			//			if (iterBullet->GetRect().intersects(iterEnemies->GetRect()))
-			//			{
-			//				iterEnemies->struck(iterBullet->GetDamage());
-			//			}
-			//			++iterBullet;
-			//		}
-			//		else
-			//		{
-			//			iterBullet = bullets.erase(iterBullet); //стереть из списка
-			//		}
-			//	}
-			//}
 			
 		}
 		GameOver = !Hero->isAlive();
@@ -240,7 +262,10 @@ void Engine::start()
 		Hero->draw(window);
 		iterEnemies = enemies.begin();
     	while (iterEnemies != enemies.end()) {
-			iterEnemies->draw(window);
+			if (iterEnemies->GetName() != "BOSSbot")
+			{
+				iterEnemies->draw(window);
+			}
 			++iterEnemies;
     	}
 		iterBullet = bullets.begin();
@@ -248,9 +273,68 @@ void Engine::start()
 			window.draw(iterBullet->sprite);
 			++iterBullet;
 		}
+		iterEnemies = enemies.begin();
+		while (iterEnemies != enemies.end()) {
+			if (iterEnemies->GetName() == "BOSSbot")
+			{
+				iterEnemies->draw(window);
+			}
+			++iterEnemies;
+		}
 		//window.draw(MyEnemy->sprite);
 		window.draw(GunDamage);
 		window.draw(Health);
+		text.setString("Score: " + std::to_string(Hero->Getscore()));
+		window.draw(text);
 		window.display();
 	}
+}
+
+int Engine::MainMenu(sf::RenderWindow& target)
+{
+	sf::Texture menuTexturePlay, menuTextureQuit, menuBackground;
+	menuTexturePlay.loadFromFile("images/Play.png");
+	menuTextureQuit.loadFromFile("images/Quit.png");
+	//menuTexture3.loadFromFile("images/Restart.png");
+	menuBackground.loadFromFile("images/jogaGame.png");
+	sf::Sprite menuPlay(menuTexturePlay), menuQuit(menuTextureQuit), menuBg(menuBackground);
+	bool isMenu = 1;
+	int menuNum = 0;
+	menuPlay.setPosition(100, 200);
+	menuQuit.setPosition(100, 500);
+	menuBg.setPosition(0, 0);
+	//////////////////////////////МЕНЮ///////////////////
+	while (isMenu)
+	{
+		menuPlay.setColor(sf::Color::White);
+		menuQuit.setColor(sf::Color::White);
+		menuNum = 0;
+		target.clear();
+
+		if (sf::IntRect(100, 200, 310, 110).contains(sf::Mouse::getPosition())) { menuPlay.setColor(sf::Color::Blue); menuNum = 1; }
+		if (sf::IntRect(100, 500, 310, 110).contains(sf::Mouse::getPosition())) { menuQuit.setColor(sf::Color::Blue); menuNum = 2; }
+
+		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+		{
+			if (menuNum == 1)
+			{
+				isMenu = false;//если нажали первую кнопку, то выходим из меню 
+				return 1;
+			}
+			if (menuNum == 2) 
+			{  
+				isMenu = false; 
+				return 0;
+			}
+
+		}
+
+		target.draw(menuBg);
+		target.draw(menuPlay);
+		target.draw(menuQuit);
+		
+
+		target.display();
+	}
+	return 0;
 }

@@ -8,6 +8,7 @@ second - flying everywere and beat the Hero
 Enemy::Enemy( sf::Image& image, float X, float Y, int W, int H, sf::String Name, sf::String TileMapEnemy[HEIGHT_MAP]) :Entity(image, X, Y, W, H, Name)
 {
 	speed = 0.1;
+	BOSSdamagetimer = 0;
 	for (int i = 0; i < HEIGHT_MAP; i++)
 	{
 		TileMap[i] = TileMapEnemy[i];
@@ -18,9 +19,12 @@ Enemy::Enemy( sf::Image& image, float X, float Y, int W, int H, sf::String Name,
 	sf::Vector2f XY = SpaunTarget();
 	x = XY.x;
 	y = XY.y;
+	healthSprite.setTexture(texture);
 	if (name == "flybot")
 	{
 		sprite.setTextureRect(sf::IntRect(12, 5, 57, 68));//w = 45; h = 63
+		healthSprite.setTextureRect(sf::IntRect(0, 0, 34, 8));
+		healthSprite.setPosition(XY.x + 10, XY.y - 10);
 	}
 	else if (name == "BOSSbot")
 	{
@@ -29,7 +33,9 @@ Enemy::Enemy( sf::Image& image, float X, float Y, int W, int H, sf::String Name,
 		BossPart.setTexture(texture);
 		BossPart.setTextureRect(sf::IntRect(754, 216, 145, 128));
 		sprite.setTextureRect(sf::IntRect(320, 0, 325, 292));
-		
+
+		healthSprite.setTextureRect(sf::IntRect(2, 252, 167, 25));
+		healthSprite.setScale(0.5, 0.5);
 		BossPart.setScale(0.5, 0.5);
 		sprite.setScale(0.5, 0.5);
 		BossPart.setOrigin(64, 72);
@@ -38,6 +44,7 @@ Enemy::Enemy( sf::Image& image, float X, float Y, int W, int H, sf::String Name,
 	}
 	//sprite.setScale(1.2, 1.2);
 	//sprite.setColor(sf::Color::Green);
+	
 	
 	sprite.setPosition(XY.x + W / 2, XY.y + H / 2);
 	
@@ -112,6 +119,28 @@ void Enemy::draw(sf::RenderTarget& target)
 	{
 		target.draw(BossPart);
 	}
+	target.draw(healthSprite);
+}
+sf::FloatRect Enemy::GetRect()
+{
+	sf::FloatRect BufRect;
+	if (name == "BOSSbot")
+	{
+		/*BufRect.left = x + w / 4;
+		BufRect.top = y + h / 4;*/
+		BufRect.left = x;
+		BufRect.top = y;
+		BufRect.width = w;
+		BufRect.height = h;
+	}
+	if (name == "flybot")
+	{
+		BufRect.left = x + 5;
+		BufRect.top = y + 5;
+		BufRect.width = w - 5;
+		BufRect.height = h - h / 4;
+	}
+	return BufRect;
 }
 //Для определения действия врага
 int Enemy::action(float time)
@@ -134,9 +163,15 @@ int Enemy::action(float time)
 		y += dy * time * speed;
 		checkCollisionWithMap(0, dy);
 		sprite.setPosition(x + w / 2, y + h / 2); //задаем позицию спрайта в место его центра
+		
 		if (name == "BOSSbot")
 		{
 			BossPart.setPosition(x + w / 2 - 5, y + h / 2 - 10);
+			healthSprite.setPosition(x , y - 20);
+		}
+		else if (name == "flybot")
+		{
+			healthSprite.setPosition(x + 10, y - 10);
 		}
 		if (abs(XYAim.x - x) < w && abs(XYAim.y - y) < h)
 		{
@@ -159,12 +194,12 @@ int Enemy::animation()
 {
 	if (name == "flybot")
 	{
-
+		healthSprite.setTextureRect(sf::IntRect(0, 0, 9 + health / 4, 8));//health ('max = 100') / 4 = 25
 		if (status == "anikilled")
 		{
 			if (moveTimer < 100)
 			{
-				sprite.setTextureRect(sf::IntRect(240, 0, 80, 80));
+				sprite.setTextureRect(sf::IntRect(240, 1, 80, 80));
 			}
 			else if (moveTimer < 200)
 			{
@@ -179,7 +214,7 @@ int Enemy::animation()
 		}
 		else if (moveTimer < 200)
 		{
-			sprite.setTextureRect(sf::IntRect(12, 5, 57, 68));
+			sprite.setTextureRect(sf::IntRect(12, 6, 57, 68));
 		}
 		else if (moveTimer < 400)
 		{
@@ -200,12 +235,13 @@ int Enemy::animation()
 	}
 	else if (name == "BOSSbot")
 	{
+		healthSprite.setTextureRect(sf::IntRect(2, 252, 24 + health / 3.5 , 25));//health ('max = 500') / 3,5 = 142
 		if (status == "anikilled")
 		{
 			
 			if (moveTimer < 200)
 			{
-				sprite.setTextureRect(sf::IntRect(240, 0, 80, 80));
+				sprite.setTextureRect(sf::IntRect(240, 1, 80, 80));
 				sprite.setScale(4,4);
 			}
 			else if (moveTimer < 300)
@@ -252,7 +288,9 @@ int Enemy::update(float time)
 	{
 		speed += 0.001;
 	}
+
 	moveTimer += time;
+	BOSSdamagetimer += time;
 	animation();
 	action(time);
 	if (status == "killed")

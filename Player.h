@@ -47,6 +47,7 @@ private:
 	sf::Sprite frame;
 	float gunrotation;
 	int score;
+	float struckTimer;
 };
 
 #endif
