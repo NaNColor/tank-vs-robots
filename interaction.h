@@ -10,19 +10,19 @@ class Engine {
 
     private:
         Player* Hero;
-        std::vector<Bullet> bullets;
+        std::vector<Bullet> bullets;// вектор пуль
         std::vector<Enemy> enemies;// вектор врагов
-        sf::Clock clock;
-        float time;
-        sf::Font font;
-        sf::Text text;
+        sf::Clock clock;// аппаратный таймер
+        float time;// основное время, отвечает за скорость игры
+        sf::Font font;// шрифт для текста
+        sf::Text text;// текст
         sf::Image map_image;//объект изображения для карты
         sf::Image allImage;//Все изображения, которые исполузуются поверх карты
         sf::Sprite s_map;//спрайт для карты
         sf::Texture map;
-        sf::Sprite Health;
-        sf::Sprite GunDamage;
+        sf::Sprite Health;//для здоровья
+        sf::Sprite GunDamage;//для уровня заряда пушки
         bool GameOver;//тригер для окончания игры
-        int MainMenu(sf::RenderWindow& target);
-        int RestartMenu(sf::RenderWindow& target);
+        int MainMenu(sf::RenderWindow& target);//меню при старте
+        int RestartMenu(sf::RenderWindow& target);//меню внутри игры
 };

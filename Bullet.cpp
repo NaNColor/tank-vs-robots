@@ -5,7 +5,7 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 	//
 
 	damage = DMG;
-	TTL = 5000;
+	TTL = 5000;//Время жизни ограничит дальность полета пули
 	sprite.setOrigin(w / 2, h / 2);
 	rotationPer = rotation;
 	rotationPer -= 90;
@@ -14,6 +14,7 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 		if (damage > 20)
 		{
 			sprite.setScale(0.1 * (damage / 10), 0.1 * (damage / 10));
+			//Чем больше дамаг, тем больше пуля
 		}
 		else
 		{
@@ -33,19 +34,19 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 	
 	dx = cos(rotationPer / 180 * 3.14159265) * 0.1;
 	dy = sin(rotationPer / 180 * 3.14159265) * 0.085;
+	// направление движения от угла
 	sprite.setPosition(x + w / 2, y + w / 2);
-	
-	
 }
 
 void Bullet::update(float time, sf::String TileMap[HEIGHT_MAP])
 {
-	//
 	moveTimer += time;
 	x += dx * time * speed;
 	checkCollisionWithMap(dx, 0, TileMap);
 	y += dy * time * speed;
 	checkCollisionWithMap(0, dy, TileMap);
+	//Скорость регулируется отдельной переменной
+	//Проверили на столкновения
 	TTL -= time;
 	if (TTL <=0)
 	{
@@ -53,7 +54,7 @@ void Bullet::update(float time, sf::String TileMap[HEIGHT_MAP])
 	}
 	if (life)
 	{
-		sprite.setPosition(x + w / 2, y + h / 2); //������ ������� ������� � ����� ��� ������
+		sprite.setPosition(x + w / 2, y + h / 2);
 	}
 	else
 	{
@@ -66,7 +67,7 @@ void Bullet::update(float time, sf::String TileMap[HEIGHT_MAP])
 
 int Bullet::GetDamage()
 {
-	life = false;
+	life = false;//Потребовали занчение дамага = пуля достигла цели
 	return damage;
 }
 
@@ -77,11 +78,13 @@ sf::FloatRect Bullet::GetRect()
 	{
 		BufRect.left = x + 10;
 		BufRect.top = y + 10;
+		//Подвинули чутка квадратик
 	}
 	else
 	{
 		BufRect.left = x -  w * (cos((rotationPer + 90 )/ 180 * 3.14159265));
 		BufRect.top = y - h * (sin((rotationPer + 90) / 180 * 3.14159265));
+		//Квадратик вписали в пулю неправильной формы
 	}
 	
 	BufRect.height = h;
@@ -148,16 +151,18 @@ void Bullet::animation()
 			moveTimer = 0;
 		}
 	}
+	//Простая смена картинок
 }
 
 void Bullet::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_MAP])
 {
-	for (int i = y / 32; i < (y + h) / 32; i++)//���������� �� ��������� �����
+	for (int i = y / 32; i < (y + h) / 32; i++)
 		for (int j = x / 32; j < (x + w) / 32; j++)
 		{
-			if (TileMap[i][j] == '0' || TileMap[i][j] == 'b')//���� ������� ��� ������ �����, ��
+			if (TileMap[i][j] == '0' || TileMap[i][j] == 'b')
 			{
 				life = false;
+				// Столкнулись = пуля врезалась
 			}
 		}
 	return;

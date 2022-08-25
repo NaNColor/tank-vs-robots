@@ -16,7 +16,7 @@ Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):
 	wheelR.setScale(0.9, 1);
 	frame.setScale(0.9, 0.9);
 	gun.setScale(0.9, 0.9);
-
+	//подогнали размеры
 	wheelL.setTextureRect(sf::IntRect(1, 80, 19, 77));
 	wheelL.setOrigin(w / 2 + 10, h / 2);
 
@@ -25,11 +25,10 @@ Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):
 
 	frame.setTextureRect(sf::IntRect(84,80,70,80));
 	frame.setOrigin(w / 2, h / 2);
-	//texture.setSmooth(true);
-	//sprite.setColor(sf::Color::Green);
+	
 	gun.setTextureRect(sf::IntRect(181, 81, 36, 78));
 	gun.setOrigin(18, 58);
-
+	//подогнали позицию-центр спрайтов
 	frame.setPosition(x, y);
 	wheelL.setPosition(x, y);
 	wheelR.setPosition(x, y);
@@ -37,7 +36,7 @@ Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):
 	gunrotation = 0;
 }
 
- //Для определения движения (пока скомунизжено)
+ //Для определения движения
 int Player::control(sf::Event event)
 {
 	state = stay;
@@ -78,7 +77,7 @@ int Player::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_
 			if (TileMap[i][j] == 'h' && state == stay && moveTimer > 1000)
 			{
 				health += 10;
-
+				//Если встали и стоим на хил поинте, то прибавляем здоровье
 				moveTimer = 500;
 				if (health > 500)
 				{
@@ -91,10 +90,8 @@ int Player::checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_
 }
 void Player::animation()
 {
-	//
 	if (state != stay)
-	{
-			
+	{	
 		if (moveTimer < 100)
 		{
 			wheelL.setTextureRect(sf::IntRect(1, 80, 19, 77));
@@ -109,6 +106,7 @@ void Player::animation()
 		{
 			moveTimer = 0;
 		}
+		//Колеса двигаются)
 	}
 	gun.setRotation(gunrotation);
 	switch (state)
@@ -136,6 +134,7 @@ void Player::animation()
 	default:
 		break;
 	}
+	//повернули спрайты по направлению движения
 	if (struckTimer > 0)
 	{
 		gun.setColor(sf::Color::Red);
@@ -149,12 +148,11 @@ void Player::animation()
 		frame.setColor(sf::Color::White);
 		wheelL.setColor(sf::Color::White);
 		wheelR.setColor(sf::Color::White);
-	}
+	}//Красим при дамаге
 	return;
 }
 int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 {
-	//
 	if (!life)
 	{
 		return 0;
@@ -170,21 +168,19 @@ int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 		{
 		case right: dx = speed; dy = 0; break;//состояние идти вправо
 		case left: dx = -speed; dy = 0; break;//состояние идти влево
-		case up: dx = 0; dy = -speed; break;//будет состояние поднятия наверх (например по лестнице)
-		case down: dx = 0; dy = speed; break;//будет состояние во время спуска персонажа (например по лестнице)
-		case stay: dx = 0; dy = 0; break;//и здесь тоже		
+		case up: dx = 0; dy = -speed; break;// состояние поднятия наверх 
+		case down: dx = 0; dy = speed; break;// состояние во время спуска  
+		case stay: dx = 0; dy = 0; break;//стоим		
 		}
 	x += dx*time; 
 	checkCollisionWithMap(dx, 0, TileMap);//обрабатываем столкновение по Х
 	y += dy*time; 
 	checkCollisionWithMap(0, dy, TileMap);//обрабатываем столкновение по Y
-	frame.setPosition(x+w/2, y+h/2); //задаем позицию спрайта в место его центра
-	//frame.setPosition(x + w / 2, y + h / 2);
+	frame.setPosition(x+w/2, y+h/2); //задаем позицию спрайта 
 	wheelL.setPosition(x + w / 2, y + h / 2);
 	wheelR.setPosition(x + w / 2, y + h / 2);
 	gun.setPosition(x + w / 2, y + h / 2);
 	if (health <= 0){life = false;}
-	//if (!isMove){ speed = 0; }
 	speed = 0;
 	return 0;
 }
@@ -216,18 +212,17 @@ sf::Vector2f Player::GetgunXY()
 		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265) - 40;
 		buf.y += 80 * sin((gunrotation - 90) / 180 * 3.14159265);
 	}
-
+	//углы не все, но большинство. Чтоб подогнать к концу пушки
 	return buf;
 }
 
 void Player::struck(int damage)
 {
 	health -= damage;
-	struckTimer = 200;
+	struckTimer = 200;//на 2мс в красный
 }
 void Player::draw(sf::RenderTarget& target)
 {
-	//
 	target.draw(wheelL);
 	target.draw(wheelR);
 	target.draw(frame);
