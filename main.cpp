@@ -1,5 +1,4 @@
-#include <iostream>
-#include <vector>
+#include <ctime>
 #include "interaction.h"
 
 /* 
@@ -19,9 +18,14 @@
 
 int main()
 {
-	Engine* level = new Engine();
-	//sf::Event event;
-	level->start();
-	delete level;
+	srand(unsigned(time(0)));
+	int way=2;
+	while ( way !=0)
+	{
+		Engine* level = new Engine();
+		way = level->play(way);
+		delete level;
+	}
+	
 	return 0;
 }

@@ -1,6 +1,5 @@
 #include "interaction.h"
 #include "map.h"
-#include <iostream>
 Engine::Engine()
 {
 	
@@ -21,8 +20,8 @@ Engine::Engine()
 
 	////
 	//Создаем объект Enemy
-	Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 45, 65, "flybot", TileMapMy);
-    enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
+	//Enemy *anotherEnemy = new Enemy(allImage, 200, 200, 45, 65, "flybot", TileMapMy);
+    //enemies.push_back(*anotherEnemy);//ukazatel chtob kartina bila
 	
 	
 
@@ -45,12 +44,15 @@ Engine::~Engine()
 	bullets.clear();
 }
 
-void Engine::start()
+int Engine::play(int number)
 {
 	sf::RenderWindow window(sf::VideoMode(1280, 800), "Game", sf::Style::Fullscreen);
-	if (!MainMenu(window))
+	sf::Cursor cursor;
+	if (cursor.loadFromSystem(sf::Cursor::Cross))
+		window.setMouseCursor(cursor);
+	if (number != 1 && !MainMenu(window))
 	{
-		return;
+		return 0;
 	}
 	float timerspaun = 0;
 	float gunTimer = 0;
@@ -83,7 +85,17 @@ void Engine::start()
 		{
 			if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape))
 			{
-				window.close();
+				switch (RestartMenu(window))
+				{
+				case 0:
+					window.close();
+					return 0;
+				case 1:
+					window.close();
+					return 1;
+				default:
+					break;
+				}
 			}
 			//if (sf::Keyboard::isKeyPressed(sf::Keyboard::Escape)) {//если нажата клавиша 
 			//	GameOver = true;
@@ -142,7 +154,7 @@ void Engine::start()
 			else
 			{
 				sf::Vector2f HeroXY = Hero->GetXY();
-				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 15, 15, Hero->GetRotation(), "HeroBullet", damage);
+				Bullet* anotherBullet = new Bullet(allImage, HeroXY.x, HeroXY.y, 10, 10, Hero->GetRotation(), "HeroBullet", damage);
 				bullets.push_back(*anotherBullet);//ukazatel chtob kartina bila
 			}
 			gunTimer = 0;
@@ -206,7 +218,7 @@ void Engine::start()
 						{
 							if (iterEnemies->GetBOSSdamagetimer() > 500)
 							{
-								Hero->struck(10);
+								Hero->struck(20);
 								iterEnemies->recetBOSSdamagetimer();
 							}
 							
@@ -270,7 +282,14 @@ void Engine::start()
     	}
 		iterBullet = bullets.begin();
 		while (iterBullet != bullets.end()) {
+			// определяем прямоугольник размером 120x50
 			window.draw(iterBullet->sprite);
+			/*sf::RectangleShape rectangle(sf::Vector2f(iterBullet->GetRect().left, iterBullet->GetRect().top));
+			rectangle.setSize(sf::Vector2f(iterBullet->GetRect().width, iterBullet->GetRect().height));
+			rectangle.setFillColor(sf::Color(255,0,0,100));
+			rectangle.setPosition(sf::Vector2f(iterBullet->GetRect().left, iterBullet->GetRect().top));
+			window.draw(rectangle);*/
+			
 			++iterBullet;
 		}
 		iterEnemies = enemies.begin();
@@ -288,53 +307,147 @@ void Engine::start()
 		window.draw(text);
 		window.display();
 	}
+	if (RestartMenu(window))
+	{
+		window.close();
+		return 1;
+	}
+	
+	window.close();
+	return 0;
 }
 
-int Engine::MainMenu(sf::RenderWindow& target)
+int Engine::RestartMenu(sf::RenderWindow& target)
 {
-	sf::Texture menuTexturePlay, menuTextureQuit, menuBackground;
+	sf::Texture menuTexturePlay, menuTextureQuit, menuTextureRestart;
 	menuTexturePlay.loadFromFile("images/Play.png");
 	menuTextureQuit.loadFromFile("images/Quit.png");
-	//menuTexture3.loadFromFile("images/Restart.png");
-	menuBackground.loadFromFile("images/jogaGame.png");
-	sf::Sprite menuPlay(menuTexturePlay), menuQuit(menuTextureQuit), menuBg(menuBackground);
+	menuTextureRestart.loadFromFile("images/Restart.png");
+	//menuBackground.loadFromFile("images/jogaGame.png");
+	sf::Sprite menuPlay(menuTexturePlay), menuQuit(menuTextureQuit), menuRestart(menuTextureRestart);
 	bool isMenu = 1;
 	int menuNum = 0;
-	menuPlay.setPosition(100, 200);
-	menuQuit.setPosition(100, 500);
-	menuBg.setPosition(0, 0);
+	if (!GameOver)
+	{
+		menuRestart.setPosition(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 - 120);
+		menuPlay.setPosition(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16);
+	}
+	else
+	{
+		menuPlay.setPosition(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 - 120);
+		menuRestart.setPosition(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16);
+	}
+	menuQuit.setPosition(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 + 120);
+	
 	//////////////////////////////МЕНЮ///////////////////
 	while (isMenu)
 	{
+		menuRestart.setColor(sf::Color::White);
 		menuPlay.setColor(sf::Color::White);
 		menuQuit.setColor(sf::Color::White);
 		menuNum = 0;
-		target.clear();
-
-		if (sf::IntRect(100, 200, 310, 110).contains(sf::Mouse::getPosition())) { menuPlay.setColor(sf::Color::Blue); menuNum = 1; }
-		if (sf::IntRect(100, 500, 310, 110).contains(sf::Mouse::getPosition())) { menuQuit.setColor(sf::Color::Blue); menuNum = 2; }
-
+		sf::RectangleShape rectangle(sf::Vector2f(20, 20));
+		rectangle.setSize(sf::Vector2f(WIDTH_MAP*32-40, HEIGHT_MAP*32-40));
+		if (!GameOver)
+		{
+			rectangle.setFillColor(sf::Color(255, 228, 200, 1));
+			rectangle.setPosition(sf::Vector2f(20, 20));
+			if (sf::IntRect(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 - 120, 310, 110).contains(sf::Mouse::getPosition()))
+			{
+				menuRestart.setColor(sf::Color::Blue); menuNum = 1;
+			}
+			if (sf::IntRect(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16, 310, 110).contains(sf::Mouse::getPosition()))
+			{
+				menuPlay.setColor(sf::Color::Blue); menuNum = 2;
+			}
+			if (sf::IntRect(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 + 120, 310, 110).contains(sf::Mouse::getPosition()))
+			{
+				menuQuit.setColor(sf::Color::Blue); menuNum = 0;
+			}
+		}
+		else
+		{
+			target.clear(sf::Color(255, 228, 200));
+			text.setCharacterSize(64);
+			text.setPosition(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 - 120);
+			if (sf::IntRect(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16, 310, 110).contains(sf::Mouse::getPosition()))
+			{
+				menuRestart.setColor(sf::Color::Blue); menuNum = 1;
+			}
+			if (sf::IntRect(WIDTH_MAP * 16 - 155, HEIGHT_MAP * 16 + 120, 310, 110).contains(sf::Mouse::getPosition()))
+			{
+				menuQuit.setColor(sf::Color::Blue); menuNum = 0;
+			}
+		}
+		
 		if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
 		{
-			if (menuNum == 1)
-			{
-				isMenu = false;//если нажали первую кнопку, то выходим из меню 
-				return 1;
-			}
-			if (menuNum == 2) 
-			{  
-				isMenu = false; 
-				return 0;
-			}
+			
+			return menuNum;
 
 		}
-
-		target.draw(menuBg);
-		target.draw(menuPlay);
+		if (!GameOver)
+		{
+			target.draw(rectangle);
+			target.draw(menuPlay);
+		}
+		target.draw(menuRestart);
 		target.draw(menuQuit);
-		
+		text.setString("Score: " + std::to_string(Hero->Getscore()));
+		target.draw(text);
 
 		target.display();
 	}
 	return 0;
+}
+
+int Engine::MainMenu(sf::RenderWindow& target)
+{
+	{
+		sf::Texture menuTexturePlay, menuTextureQuit, menuBackground;
+		menuTexturePlay.loadFromFile("images/Play.png");
+		menuTextureQuit.loadFromFile("images/Quit.png");
+		//menuTexture3.loadFromFile("images/Restart.png");
+		menuBackground.loadFromFile("images/jogaGame.png");
+		sf::Sprite menuPlay(menuTexturePlay), menuQuit(menuTextureQuit), menuBg(menuBackground);
+		bool isMenu = 1;
+		int menuNum = 0;
+		menuPlay.setPosition(100, 200);
+		menuQuit.setPosition(100, 500);
+		menuBg.setPosition(0, 0);
+		//////////////////////////////МЕНЮ///////////////////
+		while (isMenu)
+		{
+			menuPlay.setColor(sf::Color::White);
+			menuQuit.setColor(sf::Color::White);
+			menuNum = 0;
+			target.clear();
+
+			if (sf::IntRect(100, 200, 310, 110).contains(sf::Mouse::getPosition())) { menuPlay.setColor(sf::Color::Blue); menuNum = 1; }
+			if (sf::IntRect(100, 500, 310, 110).contains(sf::Mouse::getPosition())) { menuQuit.setColor(sf::Color::Blue); menuNum = 2; }
+
+			if (sf::Mouse::isButtonPressed(sf::Mouse::Left))
+			{
+				if (menuNum == 1)
+				{
+					isMenu = false;//если нажали первую кнопку, то выходим из меню 
+					return 1;
+				}
+				if (menuNum == 2)
+				{
+					isMenu = false;
+					return 0;
+				}
+
+			}
+
+			target.draw(menuBg);
+			target.draw(menuPlay);
+			target.draw(menuQuit);
+
+
+			target.display();
+		}
+		return 0;
+	}
 }

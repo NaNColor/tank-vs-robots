@@ -6,7 +6,7 @@ class Engine {
     public:
         Engine();
         ~Engine();
-        void start();
+        int play(int number);
 
     private:
         Player* Hero;
@@ -24,5 +24,5 @@ class Engine {
         sf::Sprite GunDamage;
         bool GameOver;//тригер для окончания игры
         int MainMenu(sf::RenderWindow& target);
-        
+        int RestartMenu(sf::RenderWindow& target);
 };

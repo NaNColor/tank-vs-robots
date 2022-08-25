@@ -7,7 +7,8 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 	damage = DMG;
 	TTL = 5000;
 	sprite.setOrigin(w / 2, h / 2);
-	rotation -= 90;
+	rotationPer = rotation;
+	rotationPer -= 90;
 	if (name =="HeroBullet")
 	{
 		if (damage > 20)
@@ -20,7 +21,7 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 		}
 		speed = 2;
 		sprite.setTextureRect(sf::IntRect(0, 160, 49, 80));
-		sprite.setRotation(rotation - 180);
+		sprite.setRotation(rotationPer - 180);
 	}
 	else if (name == "BossBullet")
 	{
@@ -30,8 +31,8 @@ Bullet::Bullet(sf::Image& image, float X, float Y, int W, int H, float rotation,
 	}
 
 	
-	dx = cos(rotation / 180 * 3.14159265) * 0.1;
-	dy = sin(rotation / 180 * 3.14159265) * 0.085;
+	dx = cos(rotationPer / 180 * 3.14159265) * 0.1;
+	dy = sin(rotationPer / 180 * 3.14159265) * 0.085;
 	sprite.setPosition(x + w / 2, y + w / 2);
 	
 	
@@ -74,13 +75,13 @@ sf::FloatRect Bullet::GetRect()
 	sf::FloatRect BufRect;
 	if (name == "BossBullet")
 	{
-		BufRect.left = x;
-		BufRect.top = y;
+		BufRect.left = x + 10;
+		BufRect.top = y + 10;
 	}
 	else
 	{
-		BufRect.left = x + 5;
-		BufRect.top = y + 5;
+		BufRect.left = x -  w * (cos((rotationPer + 90 )/ 180 * 3.14159265));
+		BufRect.top = y - h * (sin((rotationPer + 90) / 180 * 3.14159265));
 	}
 	
 	BufRect.height = h;

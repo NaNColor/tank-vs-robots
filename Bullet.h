@@ -12,6 +12,7 @@ public:
 	sf::FloatRect GetRect();
 private:
 	int damage;
+	float rotationPer;
 	float TTL;
 	void animation();
 	void checkCollisionWithMap(float Dx, float Dy, sf::String TileMap[HEIGHT_MAP]);

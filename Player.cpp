@@ -4,7 +4,6 @@
 // Конструктор
 Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):Entity(image,X,Y,W,H,Name)
 {
-	health = 500;
 	score = 0;
 	struckTimer = 0;
     state = up;
