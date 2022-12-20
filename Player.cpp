@@ -1,6 +1,6 @@
 #include "Player.h"
 #include "Constants.h"
-
+//#include <iostream>
 // Конструктор
 Player::Player(sf::Image &image, float X, float Y,int W,int H, sf::String Name):Entity(image,X,Y,W,H,Name)
 {
@@ -42,7 +42,7 @@ int Player::control(sf::Event event)
 	state = stay;
 	sf::Vector2i DXY = sf::Mouse::getPosition();
 	//sf::Vector2i DXY = sf::Vector2i(event.mouseMove.x, event.mouseMove.y);
-	gunrotation = atan2(-y + DXY.y, -x + DXY.x) * 180 / 3.14159265 + 90;
+	gunrotation = atan2(-y + DXY.y - 40, -x + DXY.x - 35) * 180 / 3.14159265 + 90;
 	
 	if (sf::Keyboard::isKeyPressed) {//если нажата клавиша
 		if (sf::Keyboard::isKeyPressed(sf::Keyboard::A)) {//а именно левая
@@ -188,6 +188,7 @@ int Player::update(float time, sf::String TileMap[HEIGHT_MAP], sf::Event event)
 sf::Vector2f Player::GetgunXY()
 {
 	sf::Vector2f buf = gun.getPosition();
+	///std::cout << "angle " << gunrotation << std::endl;
 	if (gunrotation < 45 && gunrotation > -45)
 	{
 		//up angle
@@ -200,7 +201,7 @@ sf::Vector2f Player::GetgunXY()
 		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265);
 		buf.y += 80 * sin((gunrotation - 90) / 180 * 3.14159265) + 20;
 	}
-	else if (gunrotation < -45 && gunrotation > -135)
+	else if (gunrotation < -45 && gunrotation > -135 || gunrotation < 270 && gunrotation > 225)
 	{
 		//left angle
 		buf.x += 80 * cos((gunrotation - 90) / 180 * 3.14159265) ;

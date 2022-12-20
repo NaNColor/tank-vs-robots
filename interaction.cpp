@@ -33,7 +33,9 @@ Engine::~Engine()
 
 int Engine::play(int number)
 {
-	sf::RenderWindow window(sf::VideoMode(1280, 800), "Game", sf::Style::Fullscreen);
+
+	sf::RenderWindow window(sf::VideoMode(1280,800), "Game", sf::Style::Fullscreen);
+	//1280*800
 	//окно сформировали, сделали на полный экран
 	sf::Cursor cursor;
 	if (cursor.loadFromSystem(sf::Cursor::Cross))
@@ -159,6 +161,7 @@ int Engine::play(int number)
 			}
 			else
 			{
+				
 				iterBullet = bullets.erase(iterBullet); //стереть из списка
 			}
 		}
@@ -198,6 +201,7 @@ int Engine::play(int number)
 					}
 					else
 					{
+						
 						iterBullet = bullets.erase(iterBullet); //стереть из списка
 					}
 				}
@@ -393,6 +397,7 @@ int Engine::MainMenu(sf::RenderWindow& target)
 		menuTextureQuit.loadFromFile("images/Quit.png");
 		menuBackground.loadFromFile("images/jogaGame.png");
 		sf::Sprite menuPlay(menuTexturePlay), menuQuit(menuTextureQuit), menuBg(menuBackground);
+		//menuBackground.setSmooth(true);
 		bool isMenu = 1;
 		int menuNum = 0;
 		menuPlay.setPosition(100, 200);
